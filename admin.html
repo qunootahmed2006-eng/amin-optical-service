@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Panel | Amin Optical Service</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <script type="module">
+
+    import {
+        auth,
+        onAuthStateChanged
+    } from "./firebase.js";
+
+
+    onAuthStateChanged(auth, (user) => {
+
+        if (!user) {
+
+            window.location.href =
+                "admin-login.html";
+
+        }
+
+    });
+
+</script>
+
+    <!-- ADMIN HEADER -->
+
+    <header>
+        <nav>
+
+            <a href="index.html" class="logo">
+                AMIN OPTICAL SERVICE
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html">Website</a>
+                <a href="frames.html">Frames</a>
+            </div>
+
+            <button onclick="logoutAdmin()" class="logout-button">
+    Logout
+</button>
+
+        </nav>
+    </header>
+
+
+    <!-- ADMIN PANEL -->
+
+    <main>
+
+        <section class="admin-panel">
+
+            <div class="admin-heading">
+
+                <p>ADMIN PANEL</p>
+
+                <h1>Manage Frames</h1>
+
+                <p>
+                    Add and manage eyewear frames for your website.
+                </p>
+
+            </div>
+
+        </section>
+
+       <div class="add-frame-form">
+
+    <h2>Add New Frame</h2>
+
+    <label>Frame Name</label>
+    <input type="text" placeholder="Enter frame name">
+
+
+    <label>Frame Image</label>
+    
+    <input type="file" id="frameImage" accept="image/*" onchange="previewFrameImage(event)">
+
+    <img id="imagePreview" class="image-preview" alt="Frame Preview">
+
+    <label>Category</label>
+    <select>
+        <option value="">Select Category</option>
+        <option value="men">Men's</option>
+        <option value="women">Women's</option>
+        <option value="kids">Kids</option>
+        <option value="unisex">Unisex</option>
+        <option value="branded">Branded</option>
+    </select>
+
+
+    <label>Description</label>
+    <textarea placeholder="Enter frame description"></textarea>
+
+    <label>Availability</label>
+
+<select id="framesAvailability">
+    <option value="available">Available</option>
+    <option value="soldout">Sold Out</option>
+</select>
+
+    <button type="button" onclick="saveFrame()">
+    Save Frame
+</button>
+
+</div> 
+
+<div class="admin-saved-frames">
+
+    <h2>Saved Frames</h2>
+
+    <div id="adminFramesList"></div>
+
+</div>
+
+<!-- ADD NEW LENS -->
+
+<div class="add-lens-form">
+
+    <h2>Add New Lens</h2>
+
+    <label>Lens Name</label>
+    <input
+        type="text"
+        placeholder="Enter lens name"
+    >
+
+    <label>Lens Image</label>
+    <input
+        type="file"
+        id="lensImage"
+        accept="image/*"
+        onchange="previewLensImage(event)"
+    >
+
+    <img
+        id="lensImagePreview"
+        class="image-preview"
+        alt="Lens Preview"
+    >
+
+    <label>Brand</label>
+
+   <select>
+    <option value="">Select Brand</option>
+    <option value="optiano">Optiano</option>
+    <option value="magic-eye">Magic Eye</option>
+    <option value="dahab">Dahab</option>
+    <option value="lensme">LensMe</option>
+    <option value="color-vision">Color Vision</option>
+</select>
+
+    <label>Description</label>
+
+    <textarea
+        placeholder="Enter lens description"
+    ></textarea>
+
+    <label for="lensAvailability">Availability</label>
+    <select id="lensAvailability">
+    <option value="available">Available</option>
+    <option value="soldout">Sold Out</option>
+</select>
+
+    <button
+        type="button"
+        onclick="saveLens()"
+    >
+        Save Lens
+    </button>
+
+</div>
+
+<!-- SAVED LENSES -->
+
+<div class="admin-saved-lenses">
+
+    <h2>Saved Lenses</h2>
+
+    <div id="adminLensesList"></div>
+
+</div>
+
+<!-- SUNGLASSES FORM -->
+
+<div class="add-sunglasses-form">
+
+<h2>Add New Sunglasses</h2>
+
+<label>Sunglasses Name</label>
+
+<input
+    type="text"
+    placeholder="Enter sunglasses name"
+>
+
+
+<label>Sunglasses Image</label>
+
+<input
+    type="file"
+    id="sunglassesImage"
+    accept="image/*"
+    onchange="previewSunglassesImage(event)"
+>
+
+<img
+    id="sunglassesImagePreview"
+    class="image-preview"
+    alt="Sunglasses Preview"
+>
+
+
+<label>Category</label>
+
+<select>
+
+    <option value="">
+        Select Category
+    </option>
+
+    <option value="men">
+        Men's
+    </option>
+
+    <option value="women">
+        Women's
+    </option>
+
+    <option value="kids">
+        Kids
+    </option>
+
+    <option value="unisex">
+        Unisex
+    </option>
+
+    <option value="branded">
+        Branded
+    </option>
+
+</select>
+
+
+<label>Description</label>
+
+<textarea
+    placeholder="Enter sunglasses description">
+</textarea>
+
+<label for="sunglassesAvailability">Availability</label>
+<select id="sunglassesAvailability">
+    <option value="available">Available</option>
+    <option value="soldout">Sold Out</option>
+</select>
+
+
+<button
+    type="button"
+    onclick="saveSunglasses()">
+    Save Sunglasses
+</button>
+
+</div>
+
+<!-- SAVED SUNGLASSES -->
+
+<div class="admin-saved-sunglasses">
+
+<h2>Saved Sunglasses</h2>
+
+<div id="adminSunglassesList"></div>
+
+</div>
+
+
+    </main>
+
+<script>
+
+let editingFrameIndex = null;
+
+
+/* ---------- IMAGE PREVIEW ---------- */
+
+function previewFrameImage(event) {
+
+    const image = document.getElementById("imagePreview");
+    const file = event.target.files[0];
+
+    if (file) {
+        image.src = URL.createObjectURL(file);
+        image.style.display = "block";
+    }
+
+}
+
+function compressFrameImage(file) {
+    return new Promise(function(resolve, reject) {
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+
+            const img = new Image();
+
+            img.onload = function() {
+
+                const canvas =
+                    document.createElement("canvas");
+
+                const maxSize = 1000;
+
+                let width = img.naturalWidth;
+                let height = img.naturalHeight;
+
+                if (width > height) {
+
+                    if (width > maxSize) {
+                        height =
+                            Math.round(
+                                height * maxSize / width
+                            );
+
+                        width = maxSize;
+                    }
+
+                } else {
+
+                    if (height > maxSize) {
+                        width =
+                            Math.round(
+                                width * maxSize / height
+                            );
+
+                        height = maxSize;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx =
+                    canvas.getContext("2d");
+
+                ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+               const compressed =
+    canvas.toDataURL(
+        "image/webp",
+        0.80
+    );
+
+                console.log(
+                    "COMPRESSED FRAME IMAGE:",
+                    width,
+                    "x",
+                    height
+                );
+
+                resolve(compressed);
+            };
+
+            img.onerror = reject;
+
+            img.src = event.target.result;
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+    });
+}
+
+/* ---------- SAVE / UPDATE FRAME ---------- */
+
+async function saveFrame() {
+
+    const name = document.querySelector(
+        '.add-frame-form input[type="text"]'
+    ).value.trim();
+
+    const imageFile =
+        document.getElementById("frameImage").files[0];
+
+    const category = document.querySelector(
+        '.add-frame-form select'
+    ).value;
+
+    const description = document.querySelector(
+        '.add-frame-form textarea'
+    ).value.trim();
+
+    const availability =
+        document.getElementById("framesAvailability").value;
+
+    if (
+        name === "" ||
+        category === "" ||
+        description === ""
+    ) {
+        alert("Please fill all frame details.");
+        return;
+    }
+
+
+    /* ---------- UPDATE EXISTING FRAME ---------- */
+
+if (editingFrameIndex !== null) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            updateDoc
+        } = await import("./firebase.js");
+
+
+        let updatedImage = null;
+
+
+        /* Keep old image unless a new image is selected */
+
+        if (imageFile) {
+
+    updatedImage =
+        await compressFrameImage(imageFile);
+
+
+        /* Firebase update */
+
+        const updateData = {
+
+            name: name,
+            category: category,
+            description: description,
+            availability: availability
+
+        };
+
+
+        /* Only replace image if a new one was selected */
+
+        if (updatedImage) {
+
+            updateData.image =
+                updatedImage;
+
+        }
+    }
+
+
+await updateDoc(
+    doc(
+        db,
+        "frames",
+        editingFrameIndex
+    ),
+    {
+        name: name,
+        category: category,
+        description: description,
+        availability: availability,
+        createdAt: Date.now()
+    }
+);
+
+
+        alert("Frame updated successfully!");
+
+
+        /* Exit edit mode */
+
+        editingFrameIndex = null;
+
+
+        resetForm();
+
+
+        /* Reload admin Firebase frames */
+
+        loadAdminFrames();
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase frame update error:",
+            error
+        );
+
+        alert(
+            "Frame update failed. Check console."
+        );
+
+    }
+
+
+    return;
+}
+
+
+    /* ---------- ADD NEW FRAME ---------- */
+
+    if (!imageFile) {
+
+        alert("Please select a frame image.");
+
+        return;
+    }
+
+
+const compressedImage =
+    await compressFrameImage(imageFile);
+
+
+let frames =
+    JSON.parse(
+        localStorage.getItem("frames")
+    ) || [];
+
+const frame = {
+
+    name: name,
+    category: category,
+    description: description,
+    image: compressedImage,
+    availability: availability
+
+};
+        try {
+
+            const {
+                db,
+                collection,
+                addDoc
+            } = await import("./firebase.js");
+
+
+await addDoc(
+    collection(db, "frames"),
+    {
+        name: frame.name,
+        category: frame.category,
+        description: frame.description,
+        image: frame.image,
+        availability: frame.availability,
+        createdAt: Date.now()
+    }
+);
+
+
+            frames.push(frame);
+
+
+            localStorage.setItem(
+                "frames",
+                JSON.stringify(frames)
+            );
+
+
+            alert("Frame saved successfully!");
+
+
+            resetForm();
+            loadAdminFrames();
+
+
+        } catch (error) {
+
+            console.error(
+                "Firebase save error:",
+                error
+            );
+
+            alert(
+                "Frame could not be saved to Firebase."
+            );
+
+        }
+
+    };
+
+
+/* ---------- LOAD ADMIN FRAMES ---------- */
+
+async function loadAdminFrames() {
+
+    const container =
+        document.getElementById("adminFramesList");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    try {
+
+        const {
+            db,
+            collection,
+            getDocs
+        } = await import("./firebase.js");
+
+
+        const snapshot =
+            await getDocs(
+                collection(db, "frames")
+            );
+
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <p class="no-admin-frames">
+                    No uploaded frames yet.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        snapshot.forEach(function(firebaseDoc) {
+
+            const frame =
+                firebaseDoc.data();
+
+
+            const frameItem =
+                document.createElement("div");
+
+            frameItem.className =
+                "admin-frame-item";
+
+
+            frameItem.innerHTML = `
+                <img
+                    src="${frame.image}"
+                    alt="${frame.name}"
+                >
+
+                <div class="admin-frame-info">
+
+                    <h3>${frame.name}</h3>
+
+                    <div class="admin-product-meta">
+
+                        <span>${frame.category}</span>
+
+                        <span class="availability-status ${frame.availability === "soldout" ? "sold-out" : "available"}">
+                            ${frame.availability === "soldout" ? "Sold Out" : "Available"}
+                        </span>
+
+                    </div>
+
+                    <p>${frame.description}</p>
+
+                </div>
+
+                <div class="admin-frame-actions">
+
+                    <button
+                        type="button"
+                        onclick="editFrame('${firebaseDoc.id}')">
+                        Edit
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="deleteFrame('${firebaseDoc.id}')">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+
+
+            container.appendChild(frameItem);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase admin frames loading error:",
+            error
+        );
+
+        container.innerHTML = `
+            <p class="no-admin-frames">
+                Unable to load frames.
+            </p>
+        `;
+
+    }
+}
+
+/* ---------- EDIT FRAME ---------- */
+
+async function editFrame(firebaseDocId) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            getDoc
+        } = await import("./firebase.js");
+
+
+        const frameDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "frames",
+                    firebaseDocId
+                )
+            );
+
+
+        if (!frameDoc.exists()) {
+
+            alert("Frame not found in Firebase.");
+
+            return;
+        }
+
+
+        const frame =
+            frameDoc.data();
+
+
+        /* Save Firebase document ID */
+
+        editingFrameIndex =
+            firebaseDocId;
+
+
+        /* Fill form */
+
+        document.querySelector(
+            '.add-frame-form input[type="text"]'
+        ).value =
+            frame.name || "";
+
+
+        document.querySelector(
+            '.add-frame-form select'
+        ).value =
+            frame.category || "";
+
+
+        document.querySelector(
+            '.add-frame-form textarea'
+        ).value =
+            frame.description || "";
+
+
+        document.getElementById(
+            "framesAvailability"
+        ).value =
+            frame.availability || "available";
+
+
+        /* Show image preview */
+
+        const preview =
+            document.getElementById(
+                "imagePreview"
+            );
+
+
+        preview.src =
+            frame.image || "";
+
+
+        preview.style.display =
+            "block";
+
+
+        /* Change button text */
+
+        document.querySelector(
+            '.add-frame-form button[type="button"]'
+        ).textContent =
+            "Update Frame";
+
+
+        /* Scroll to form */
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase frame edit loading error:",
+            error
+        );
+
+        alert(
+            "Unable to load frame for editing."
+        );
+
+    }
+}
+
+window.editFrame = editFrame;
+
+
+/* ---------- DELETE FRAME ---------- */
+
+async function deleteFrame(firebaseDocId) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            getDoc,
+            deleteDoc
+        } = await import("./firebase.js");
+
+
+        /* Get frame information first */
+
+        const frameDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "frames",
+                    firebaseDocId
+                )
+            );
+
+
+        if (!frameDoc.exists()) {
+
+            alert("Frame not found in Firebase.");
+
+            return;
+        }
+
+
+        const frame =
+            frameDoc.data();
+
+
+        /* Confirmation */
+
+        const confirmDelete =
+            confirm(
+                `Are you sure you want to delete "${frame.name}"?`
+            );
+
+
+        if (!confirmDelete) return;
+
+
+        /* Delete directly from Firebase */
+
+        await deleteDoc(
+            doc(
+                db,
+                "frames",
+                firebaseDocId
+            )
+        );
+
+
+        alert(
+            "Frame deleted successfully!"
+        );
+
+
+        /* Reload admin list */
+
+        loadAdminFrames();
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase frame delete error:",
+            error
+        );
+
+        alert(
+            "Frame could not be deleted from Firebase."
+        );
+
+    }
+}
+
+
+window.deleteFrame = deleteFrame;
+
+/* ---------- RESET FORM ---------- */
+
+function resetForm() {
+
+    editingFrameIndex = null;
+
+
+    document.querySelector(
+        '.add-frame-form input[type="text"]'
+    ).value = "";
+
+
+    document.getElementById(
+        "frameImage"
+    ).value = "";
+
+
+    document.querySelector(
+        '.add-frame-form select'
+    ).value = "";
+
+
+    document.getElementById("framesAvailability").value = "available";
+    document.querySelector(
+        '.add-frame-form textarea'
+    ).value = "";
+
+
+    const preview =
+        document.getElementById("imagePreview");
+
+    preview.src = "";
+
+    preview.style.display = "none";
+
+
+    document.querySelector(
+        '.add-frame-form button[type="button"]'
+    ).textContent = "Save Frame";
+
+}
+
+
+/* ---------- LOAD WHEN PAGE OPENS ---------- */
+
+loadAdminFrames();
+
+/* ---------- LENS VARIABLES ---------- */
+
+let editingLensIndex = null;
+
+
+/* ---------- LENS IMAGE PREVIEW ---------- */
+
+function compressLensImage(file) {
+
+    return new Promise(function(resolve, reject) {
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+
+            const img = new Image();
+
+            img.onload = function() {
+
+                const canvas = document.createElement("canvas");
+
+                canvas.width = 500;
+                canvas.height = 500;
+
+                const ctx = canvas.getContext("2d");
+
+                ctx.drawImage(img, 0, 0, 500, 500);
+
+                const compressed =
+                    canvas.toDataURL("image/jpeg", 0.5);
+
+                resolve(compressed);
+
+            };
+
+            img.onerror = reject;
+
+            img.src = event.target.result;
+
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
+function previewLensImage(input) {
+
+    const preview =
+        document.getElementById("lensImagePreview");
+
+    if (!input.files || !input.files[0]) {
+        preview.style.display = "none";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+
+        preview.src = event.target.result;
+        preview.style.display = "block";
+
+    };
+
+    reader.readAsDataURL(input.files[0]);
+}
+
+window.previewLensImage = previewLensImage;
+
+/* ---------- SAVE / UPDATE LENS ---------- */
+
+async function saveLens() {
+
+    const name =
+        document.querySelector(
+            ".add-lens-form input[type='text']"
+        ).value.trim();
+
+    const imageFile =
+        document.getElementById("lensImage").files[0];
+
+const brand =
+    document.querySelector(
+        ".add-lens-form select"
+    ).value;
+
+    const description =
+        document.querySelector(
+            ".add-lens-form textarea"
+        ).value.trim();
+
+    const availability =
+        document.getElementById(
+            "lensAvailability"
+        ).value;
+
+
+    /* ---------- VALIDATION ---------- */
+
+    if (
+        name === "" ||
+        brand === "" ||
+        description === ""
+    ) {
+
+        alert("Please fill in all lens details.");
+
+        return;
+
+    }
+
+
+    /* ---------- UPDATE EXISTING LENS ---------- */
+
+if (editingLensIndex !== null) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            updateDoc,
+            getDoc
+        } = await import("./firebase.js");
+
+        const lensDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "lenses",
+                    editingLensIndex
+                )
+            );
+
+        if (!lensDoc.exists()) {
+            alert("Lens not found in Firebase.");
+            return;
+        }
+
+        const oldLens =
+            lensDoc.data();
+
+        let image =
+            oldLens.image;
+
+        if (imageFile) {
+
+    image =
+        await compressLensImage(imageFile);
+}
+
+await updateDoc(
+    doc(
+        db,
+        "lenses",
+        editingLensIndex
+    ),
+    {
+        name: name,
+        brand: brand,
+        description: description,
+        image: image,
+        availability: availability,
+        createdAt: Date.now()
+    }
+);
+
+        alert("Lens updated successfully!");
+
+        resetLensForm();
+        loadAdminLenses();
+
+    } catch (error) {
+
+        console.error(
+            "Firebase lens update error:",
+            error
+        );
+
+        alert(
+            "Lens could not be updated."
+        );
+    }
+
+    return;
+}
+
+    /* ---------- NEW LENS NEEDS IMAGE ---------- */
+
+    if (!imageFile) {
+
+        alert("Please select a lens image.");
+
+        return;
+
+    }
+
+
+    try {
+
+        const image =
+    await compressLensImage(imageFile);
+
+
+        const {
+            db,
+            collection,
+            addDoc
+        } = await import("./firebase.js");
+
+
+        /* ---------- SAVE TO FIREBASE ---------- */
+
+await addDoc(
+    collection(
+        db,
+        "lenses"
+    ),
+    {
+        name: name,
+        brand: brand,
+        description: description,
+        image: image,
+        availability: availability,
+        createdAt: Date.now()
+    }
+);
+
+
+      alert(
+    "Lens saved successfully!"
+);
+
+    resetLensForm();
+loadAdminLenses();
+
+    } catch (error) {
+
+        console.error(
+            "Firebase lens save error:",
+            error
+        );
+
+        alert(
+            "Lens could not be saved to Firebase."
+        );
+
+    }
+
+}
+
+function resetLensForm() {
+
+    editingLensIndex = null;
+
+    document.querySelector(
+        ".add-lens-form input[type='text']"
+    ).value = "";
+
+    document.getElementById(
+        "lensImage"
+    ).value = "";
+
+    document.querySelector(
+        ".add-lens-form select"
+    ).value = "";
+
+    document.querySelector(
+        ".add-lens-form textarea"
+    ).value = "";
+
+    document.getElementById(
+        "lensAvailability"
+    ).value = "available";
+
+
+    const preview =
+        document.getElementById(
+            "lensImagePreview"
+        );
+
+    preview.src = "";
+    preview.style.display = "none";
+
+
+    document.querySelector(
+        ".add-lens-form button[type='button']"
+    ).textContent = "Save Lens";
+}
+window.resetLensForm =
+    resetLensForm;
+
+/* ---------- LOAD ADMIN LENSES ---------- */
+
+async function loadAdminLenses() {
+
+    const container =
+        document.getElementById("adminLensesList");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    try {
+
+        const {
+            db,
+            collection,
+            getDocs
+        } = await import("./firebase.js");
+
+
+        const snapshot =
+            await getDocs(
+                collection(db, "lenses")
+            );
+
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <p class="no-admin-frames">
+                    No uploaded lenses yet.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        snapshot.forEach(function(firebaseDoc) {
+
+            const lens =
+                firebaseDoc.data();
+
+
+            const item =
+                document.createElement("div");
+
+
+            item.className =
+                "admin-frame-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${lens.image}"
+                    alt="${lens.name}"
+                >
+
+                <div class="admin-frame-info">
+
+                    <h3>${lens.name}</h3>
+
+                    <div class="admin-product-meta">
+
+                        <span>${lens.brand}</span>
+
+                        <span class="availability-status ${
+                            lens.availability === "soldout"
+                            ? "sold-out"
+                            : "available"
+                        }">
+                            ${
+                                lens.availability === "soldout"
+                                ? "Sold Out"
+                                : "Available"
+                            }
+                        </span>
+
+                    </div>
+
+                    <p>${lens.description}</p>
+
+                </div>
+
+                <div class="admin-frame-actions">
+
+                    <button
+                        type="button"
+                        onclick="editLens('${firebaseDoc.id}')">
+                        Edit
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="deleteLens('${firebaseDoc.id}')">
+                        Delete
+                    </button>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(item);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase admin lenses loading error:",
+            error
+        );
+
+        container.innerHTML = `
+            <p class="no-admin-frames">
+                Unable to load lenses.
+            </p>
+        `;
+
+    }
+}
+
+
+/* ---------- EDIT LENS ---------- */
+
+async function editLens(firebaseDocId) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            getDoc
+        } = await import("./firebase.js");
+
+        const lensDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "lenses",
+                    firebaseDocId
+                )
+            );
+
+        if (!lensDoc.exists()) {
+            alert("Lens not found in Firebase.");
+            return;
+        }
+
+        const lens =
+            lensDoc.data();
+
+        editingLensIndex =
+            firebaseDocId;
+
+        document.querySelector(
+            ".add-lens-form input[type='text']"
+        ).value = lens.name;
+
+        document.querySelector(
+            ".add-lens-form select"
+        ).value = lens.brand;
+
+        document.querySelector(
+            ".add-lens-form textarea"
+        ).value = lens.description;
+
+        document.getElementById(
+            "lensAvailability"
+        ).value =
+            lens.availability || "available";
+
+        const preview =
+            document.getElementById(
+                "lensImagePreview"
+            );
+
+        preview.src =
+            lens.image;
+
+        preview.style.display =
+            "block";
+
+        document.querySelector(
+            ".add-lens-form button[type='button']"
+        ).textContent =
+            "Update Lens";
+
+        document.querySelector(
+            ".add-lens-form"
+        ).scrollIntoView({
+            behavior: "smooth"
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Firebase lens edit error:",
+            error
+        );
+
+        alert(
+            "Lens could not be loaded for editing."
+        );
+    }
+}
+
+window.editLens = editLens;
+
+
+/* ---------- DELETE LENS ---------- */
+
+async function deleteLens(firebaseDocId) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            getDoc,
+            deleteDoc
+        } = await import("./firebase.js");
+
+        const lensDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "lenses",
+                    firebaseDocId
+                )
+            );
+
+        if (!lensDoc.exists()) {
+
+            alert(
+                "Lens not found in Firebase."
+            );
+
+            return;
+        }
+
+        const lens =
+            lensDoc.data();
+
+        const confirmDelete =
+            confirm(
+                `Are you sure you want to delete "${lens.name}"?`
+            );
+
+        if (!confirmDelete) return;
+
+        await deleteDoc(
+            doc(
+                db,
+                "lenses",
+                firebaseDocId
+            )
+        );
+
+        alert(
+            "Lens deleted successfully!"
+        );
+
+        loadAdminLenses();
+
+    } catch (error) {
+
+        console.error(
+            "Firebase lens delete error:",
+            error
+        );
+
+        alert(
+            "Lens could not be deleted from Firebase."
+        );
+    }
+}
+
+window.deleteLens = deleteLens;
+
+
+/* ---------- LOAD LENSES WHEN PAGE OPENS ---------- */
+
+loadAdminLenses();
+
+let editingSunglassesIndex = null;
+
+function previewSunglassesImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById("sunglassesImagePreview");
+
+    if (!file) {
+        preview.src = "";
+        preview.style.display = "none";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+
+    preview.src = event.target.result;
+    preview.style.display = "block";
+
+    const testImage = new Image();
+
+    testImage.onload = function() {
+
+        console.log(
+            "ORIGINAL SUNGLASSES FILE SIZE:",
+            testImage.naturalWidth,
+            "x",
+            testImage.naturalHeight
+        );
+
+    };
+
+    testImage.src = event.target.result;
+};
+
+    reader.readAsDataURL(file);
+}
+
+function compressSunglassesImage(file) {
+    return new Promise(function(resolve, reject) {
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+
+            const img = new Image();
+
+            img.onload = function() {
+
+                const canvas = document.createElement("canvas");
+
+                const maxSize = 1000;
+
+                let width = img.naturalWidth;
+                let height = img.naturalHeight;
+
+                if (width > height) {
+
+                    if (width > maxSize) {
+                        height =
+                            Math.round(
+                                height * maxSize / width
+                            );
+
+                        width = maxSize;
+                    }
+
+                } else {
+
+                    if (height > maxSize) {
+                        width =
+                            Math.round(
+                                width * maxSize / height
+                            );
+
+                        height = maxSize;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx =
+                    canvas.getContext("2d");
+
+                ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+                const compressed =
+                    canvas.toDataURL(
+                        "image/jpeg",
+                        0.75
+                    );
+
+                console.log(
+                    "COMPRESSED SUNGLASSES IMAGE:",
+                    width,
+                    "x",
+                    height
+                );
+
+                resolve(compressed);
+            };
+
+            img.onerror = reject;
+
+            img.src = event.target.result;
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+    });
+}
+
+async function saveSunglasses() {
+
+    const name =
+        document
+            .querySelector(
+                ".add-sunglasses-form input[type='text']"
+            )
+            .value
+            .trim();
+
+    const imageFile =
+        document.getElementById(
+            "sunglassesImage"
+        ).files[0];
+
+    const category =
+        document
+            .querySelector(
+                ".add-sunglasses-form select"
+            )
+            .value;
+
+    const description =
+        document
+            .querySelector(
+                ".add-sunglasses-form textarea"
+            )
+            .value
+            .trim();
+
+    const availability =
+        document.getElementById(
+            "sunglassesAvailability"
+        ).value;
+
+
+    /* ---------- VALIDATION ---------- */
+
+    if (
+        name === "" ||
+        category === "" ||
+        description === ""
+    ) {
+
+        alert(
+            "Please fill in all sunglasses details."
+        );
+
+        return;
+    }
+
+
+    /* ---------- UPDATE EXISTING SUNGLASSES ---------- */
+
+    if (editingSunglassesIndex !== null) {
+
+        try {
+
+            const {
+                db,
+                doc,
+                getDoc,
+                updateDoc
+            } = await import("./firebase.js");
+
+
+            const sunglassesDoc =
+                await getDoc(
+                    doc(
+                        db,
+                        "sunglasses",
+                        editingSunglassesIndex
+                    )
+                );
+
+
+            if (!sunglassesDoc.exists()) {
+
+                alert(
+                    "Sunglasses not found in Firebase."
+                );
+
+                return;
+            }
+
+
+            const oldSunglasses =
+                sunglassesDoc.data();
+
+
+            let image =
+                oldSunglasses.image;
+
+
+            /* ---------- NEW IMAGE ---------- */
+
+            if (imageFile) {
+
+    image =
+        await compressSunglassesImage(imageFile);
+
+}
+
+
+            /* ---------- UPDATE FIREBASE ---------- */
+
+await updateDoc(
+    doc(
+        db,
+        "sunglasses",
+        editingSunglassesIndex
+    ),
+    {
+        name: name,
+        category: category,
+        description: description,
+        image: image,
+        availability: availability,
+        createdAt: Date.now()
+    }
+);
+
+
+            alert(
+                "Sunglasses updated successfully!"
+            );
+
+
+            resetSunglassesForm();
+
+            loadAdminSunglasses();
+
+        } catch (error) {
+
+            console.error(
+                "Firebase sunglasses update error:",
+                error
+            );
+
+            alert(
+                "Sunglasses could not be updated."
+            );
+        }
+
+
+        return;
+    }
+
+
+    /* ---------- NEW SUNGLASSES NEED IMAGE ---------- */
+
+    if (!imageFile) {
+
+        alert(
+            "Please select a sunglasses image."
+        );
+
+        return;
+    }
+
+
+    try {
+
+const image =
+    await compressSunglassesImage(imageFile);
+
+const testSavedImage = new Image();
+
+testSavedImage.onload = function () {
+    console.log(
+        "IMAGE BEING SAVED TO FIREBASE:",
+        testSavedImage.naturalWidth,
+        "x",
+        testSavedImage.naturalHeight
+    );
+};
+
+testSavedImage.src = image;
+
+        const {
+            db,
+            collection,
+            addDoc
+        } = await import(
+            "./firebase.js"
+        );
+
+
+        /* ---------- SAVE TO FIREBASE ---------- */
+
+await addDoc(
+    collection(
+        db,
+        "sunglasses"
+    ),
+    {
+        name: name,
+        category: category,
+        description: description,
+        image: image,
+        availability: availability,
+        createdAt: Date.now()
+    }
+);
+
+
+        alert(
+            "Sunglasses saved successfully!"
+        );
+
+
+        resetSunglassesForm();
+
+        loadAdminSunglasses();
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase sunglasses save error:",
+            error
+        );
+
+        alert(
+            "Sunglasses could not be saved to Firebase."
+        );
+    }
+}
+
+
+function resetSunglassesForm() {
+
+    editingSunglassesIndex = null;
+
+    document
+        .querySelector(".add-sunglasses-form input[type='text']")
+        .value = "";
+
+    document.getElementById("sunglassesImage").value = "";
+
+    document
+        .querySelector(".add-sunglasses-form select")
+        .value = "";
+
+    document.getElementById("sunglassesAvailability").value = "available";
+
+    document
+        .querySelector(".add-sunglasses-form textarea")
+        .value = "";
+
+
+    const preview =
+        document.getElementById("sunglassesImagePreview");
+
+    preview.src = "";
+    preview.style.display = "none";
+
+
+    document
+        .querySelector(".add-sunglasses-form button[type='button']")
+        .textContent = "Save Sunglasses";
+}
+
+
+async function loadAdminSunglasses() {
+
+    const container =
+        document.getElementById(
+            "adminSunglassesList"
+        );
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    try {
+
+        const {
+            db,
+            collection,
+            getDocs
+        } = await import("./firebase.js");
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "sunglasses"
+                )
+            );
+
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <p class="no-admin-frames">
+                    No uploaded sunglasses yet.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        snapshot.forEach(function(firebaseDoc) {
+
+            const item =
+                firebaseDoc.data();
+
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "admin-frame-item";
+
+
+            card.innerHTML = `
+                <img
+                    src="${item.image}"
+                    alt="${item.name}"
+                >
+
+                <div class="admin-frame-info">
+
+                    <h3>${item.name}</h3>
+
+                    <div class="admin-product-meta">
+
+                        <span>
+                            ${item.category}
+                        </span>
+
+                        <span class="availability-status ${
+                            item.availability === "soldout"
+                            ? "sold-out"
+                            : "available"
+                        }">
+                            ${
+                                item.availability === "soldout"
+                                ? "Sold Out"
+                                : "Available"
+                            }
+                        </span>
+
+                    </div>
+
+                    <p>
+                        ${item.description}
+                    </p>
+
+                </div>
+
+
+                <div class="admin-frame-actions">
+
+                    <button
+                        type="button"
+                        onclick="editSunglasses('${firebaseDoc.id}')">
+                        Edit
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="deleteSunglasses('${firebaseDoc.id}')">
+                        Delete
+                    </button>
+
+                </div>
+            `;
+
+
+            container.appendChild(card);
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Firebase admin sunglasses loading error:",
+            error
+        );
+
+        container.innerHTML = `
+            <p class="no-admin-frames">
+                Unable to load sunglasses.
+            </p>
+        `;
+    }
+}
+
+
+async function editSunglasses(firebaseDocId) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            getDoc
+        } = await import("./firebase.js");
+
+
+        const sunglassesDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "sunglasses",
+                    firebaseDocId
+                )
+            );
+
+
+        if (!sunglassesDoc.exists()) {
+
+            alert(
+                "Sunglasses not found in Firebase."
+            );
+
+            return;
+        }
+
+
+        const item =
+            sunglassesDoc.data();
+
+
+        editingSunglassesIndex =
+            firebaseDocId;
+
+
+        document
+            .querySelector(
+                ".add-sunglasses-form input[type='text']"
+            )
+            .value = item.name;
+
+
+        document
+            .querySelector(
+                ".add-sunglasses-form select"
+            )
+            .value = item.category;
+
+
+        document
+            .querySelector(
+                ".add-sunglasses-form textarea"
+            )
+            .value = item.description;
+
+
+        document.getElementById(
+            "sunglassesAvailability"
+        ).value =
+            item.availability || "available";
+
+
+        const preview =
+            document.getElementById(
+                "sunglassesImagePreview"
+            );
+
+
+        preview.src =
+            item.image;
+
+        preview.style.display =
+            "block";
+
+
+        document
+            .querySelector(
+                ".add-sunglasses-form button[type='button']"
+            )
+            .textContent =
+            "Update Sunglasses";
+
+
+        document
+            .querySelector(
+                ".add-sunglasses-form"
+            )
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase sunglasses edit error:",
+            error
+        );
+
+        alert(
+            "Sunglasses could not be loaded for editing."
+        );
+    }
+}
+
+
+window.editSunglasses =
+    editSunglasses;
+
+
+async function deleteSunglasses(firebaseDocId) {
+
+    try {
+
+        const {
+            db,
+            doc,
+            getDoc,
+            deleteDoc
+        } = await import("./firebase.js");
+
+
+        const sunglassesDoc =
+            await getDoc(
+                doc(
+                    db,
+                    "sunglasses",
+                    firebaseDocId
+                )
+            );
+
+
+        if (!sunglassesDoc.exists()) {
+
+            alert(
+                "Sunglasses not found in Firebase."
+            );
+
+            return;
+        }
+
+
+        const item =
+            sunglassesDoc.data();
+
+
+        const confirmDelete =
+            confirm(
+                `Are you sure you want to delete "${item.name}"?`
+            );
+
+
+        if (!confirmDelete) return;
+
+
+        await deleteDoc(
+            doc(
+                db,
+                "sunglasses",
+                firebaseDocId
+            )
+        );
+
+
+        alert(
+            "Sunglasses deleted successfully!"
+        );
+
+
+        loadAdminSunglasses();
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase sunglasses delete error:",
+            error
+        );
+
+        alert(
+            "Sunglasses could not be deleted from Firebase."
+        );
+    }
+}
+
+
+window.deleteSunglasses =
+    deleteSunglasses;
+
+loadAdminSunglasses();
+
+async function logoutAdmin() {
+
+    try {
+
+        const { auth, signOut } =
+            await import("./firebase.js");
+
+        await signOut(auth);
+
+        window.location.href =
+            "admin-login.html";
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+        alert("Logout failed.");
+
+    }
+}
+
+window.logoutAdmin = logoutAdmin;
+
+</script>
+
+    <!-- FOOTER -->
+
+    <footer>
+        <p>© 2026 Amin Optical Service. All Rights Reserved.</p>
+    </footer>
+
+</body>
+
+</html>

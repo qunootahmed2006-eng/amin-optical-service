@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sunglasses | Amin Optical Service</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+<!-- NAVBAR -->
+
+<header>
+
+    <nav>
+<a href="index.html" class="logo">
+    <img src="logo.png" alt="Amin Optical Service Logo">
+</a>
+
+    <div class="nav-links">
+        <a href="index.html#home">Home</a>
+        <a href="frames.html">Frames</a>
+        <a href="lenses.html">Lenses</a>
+        <a href="sunglasses.html">Sunglasses</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#contact">Contact</a>
+    </div>
+</nav>
+
+</header>
+
+
+<!-- SUNGLASSES PAGE -->
+
+<main>
+
+    <section class="sunglasses-page">
+
+        <!-- PAGE HEADING -->
+
+        <div class="sunglasses-heading">
+
+            <p>OUR SUNGLASSES COLLECTION</p>
+
+            <h1>Find Your Perfect Shades</h1>
+
+            <p>
+                Explore stylish sunglasses designed for everyday
+                comfort, protection and a confident look.
+            </p>
+
+        </div>
+
+
+        <!-- SUNGLASSES CATEGORIES -->
+
+        <div class="sunglasses-categories">
+
+            <button
+                class="category-active"
+                onclick="filterSunglasses('all', this)">
+                All Sunglasses
+            </button>
+
+            <button
+                onclick="filterSunglasses('men', this)">
+                Men's
+            </button>
+
+            <button
+                onclick="filterSunglasses('women', this)">
+                Women's
+            </button>
+
+            <button
+                onclick="filterSunglasses('kids', this)">
+                Kids
+            </button>
+
+            <button
+                onclick="filterSunglasses('unisex', this)">
+                Unisex
+            </button>
+
+            <button
+                onclick="filterSunglasses('branded', this)">
+                Branded
+            </button>
+
+        </div>
+
+
+        <!-- SUNGLASSES GRID -->
+
+        <div
+            class="sunglasses-grid"
+            id="sunglassesGrid">
+
+            <!-- SUNGLASSES CARDS YAHAN AAYENGE -->
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- ---------- REQUIREMENT FORM ---------- -->
+
+<div id="requirementModal" class="requirement-modal">
+
+    <div class="requirement-form">
+
+        <button
+            type="button"
+            class="close-requirement"
+            onclick="closeRequirementForm()"
+        >
+            ×
+        </button>
+
+        <h2>Ask About This Product</h2>
+
+        <p>
+            Fill in your details and we'll contact you
+            on WhatsApp.
+        </p>
+
+        <label>Your Name</label>
+
+        <input
+            type="text"
+            placeholder="Enter your name"
+        >
+
+        <label>Phone / WhatsApp</label>
+
+        <input
+            type="tel"
+            placeholder="Enter your phone number"
+        >
+
+        <label>Your Requirement</label>
+
+        <textarea
+            placeholder="Tell us what you need..."
+        ></textarea>
+
+        <button
+            type="button"
+            class="submit-requirement"
+            onclick="sendRequirement()"
+        >
+            Send via WhatsApp
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ---------- SUNGLASSES VARIABLES ---------- */
+
+let editingSunglassesIndex = null;
+
+/* ---------- SUNGLASSES IMAGE PREVIEW ---------- */
+
+function previewSunglassesImage(event) {
+
+const file = event.target.files[0];
+
+const preview =
+    document.getElementById(
+        "sunglassesImagePreview"
+    );
+
+if (!file) {
+
+    preview.src = "";
+    preview.style.display = "none";
+
+    return;
+}
+
+const reader = new FileReader();
+
+reader.onload = function(event) {
+
+    preview.src = event.target.result;
+    preview.style.display = "block";
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+/* ---------- SAVE / UPDATE SUNGLASSES ---------- */
+
+function saveSunglasses() {
+
+const name =
+    document.querySelector(
+        ".add-sunglasses-form input[type='text']"
+    ).value.trim();
+
+const imageFile =
+    document.getElementById(
+        "sunglassesImage"
+    ).files[0];
+
+const category =
+    document.querySelector(
+        ".add-sunglasses-form select"
+    ).value;
+
+const description =
+    document.querySelector(
+        ".add-sunglasses-form textarea"
+    ).value.trim();
+
+
+if (
+    name === "" ||
+    category === "" ||
+    description === ""
+) {
+
+    alert(
+        "Please fill in all sunglasses details."
+    );
+
+    return;
+}
+
+
+/* ---------- UPDATE WITHOUT NEW IMAGE ---------- */
+
+if (
+    editingSunglassesIndex !== null &&
+    !imageFile
+) {
+
+    let sunglasses =
+        JSON.parse(
+            localStorage.getItem("sunglasses")
+        ) || [];
+
+
+    sunglasses[editingSunglassesIndex].name =
+        name;
+
+    sunglasses[editingSunglassesIndex].category =
+        category;
+
+    sunglasses[editingSunglassesIndex].description =
+        description;
+
+
+    localStorage.setItem(
+        "sunglasses",
+        JSON.stringify(sunglasses)
+    );
+
+
+    alert(
+        "Sunglasses updated successfully!"
+    );
+
+
+    resetSunglassesForm();
+
+    loadAdminSunglasses();
+
+    return;
+}
+
+
+/* ---------- IMAGE REQUIRED FOR NEW PRODUCT ---------- */
+
+if (!imageFile) {
+
+    alert(
+        "Please select a sunglasses image."
+    );
+
+    return;
+}
+
+
+const reader = new FileReader();
+
+
+reader.onload = function(event) {
+
+    let sunglasses =
+        JSON.parse(
+            localStorage.getItem("sunglasses")
+        ) || [];
+
+
+    const product = {
+
+        name: name,
+
+        category: category,
+
+        description: description,
+
+        image: event.target.result
+
+    };
+
+
+    if (
+        editingSunglassesIndex !== null
+    ) {
+
+        sunglasses[
+            editingSunglassesIndex
+        ] = product;
+
+
+        alert(
+            "Sunglasses updated successfully!"
+        );
+
+    } else {
+
+        sunglasses.push(product);
+
+
+        alert(
+            "Sunglasses saved successfully!"
+        );
+
+    }
+
+
+    localStorage.setItem(
+        "sunglasses",
+        JSON.stringify(sunglasses)
+    );
+
+
+    resetSunglassesForm();
+
+    loadAdminSunglasses();
+
+};
+
+
+reader.readAsDataURL(imageFile);
+
+}
+
+/* ---------- RESET SUNGLASSES FORM ---------- */
+
+function resetSunglassesForm() {
+
+editingSunglassesIndex = null;
+
+
+document.querySelector(
+    ".add-sunglasses-form input[type='text']"
+).value = "";
+
+
+document.getElementById(
+    "sunglassesImage"
+).value = "";
+
+
+document.querySelector(
+    ".add-sunglasses-form select"
+).value = "";
+
+
+document.querySelector(
+    ".add-sunglasses-form textarea"
+).value = "";
+
+
+const preview =
+    document.getElementById(
+        "sunglassesImagePreview"
+    );
+
+
+preview.src = "";
+
+preview.style.display = "none";
+
+
+document.querySelector(
+    ".add-sunglasses-form button[type='button']"
+).textContent =
+    "Save Sunglasses";
+
+
+}
+
+/* ---------- LOAD ADMIN SUNGLASSES ---------- */
+
+function loadAdminSunglasses() {
+
+const sunglasses =
+    JSON.parse(
+        localStorage.getItem("sunglasses")
+    ) || [];
+
+
+const container =
+    document.getElementById(
+        "adminSunglassesList"
+    );
+
+
+if (!container) return;
+
+
+container.innerHTML = "";
+
+
+if (sunglasses.length === 0) {
+
+    container.innerHTML = `
+        <p class="no-admin-frames">
+            No uploaded sunglasses yet.
+        </p>
+    `;
+
+    return;
+}
+
+
+sunglasses.forEach(
+    function(product, index) {
+
+        const item =
+            document.createElement("div");
+
+
+        item.className =
+            "admin-frame-item";
+
+
+        item.innerHTML = `
+
+            <img
+                src="${product.image}"
+                alt="${product.name}"
+            >
+
+            <div class="admin-frame-info">
+
+                <h3>${product.name}</h3>
+
+                <span>${product.category}</span>
+
+                <p>
+                    ${product.description}
+                </p>
+
+            </div>
+
+            <div class="admin-frame-actions">
+
+                <button
+                    type="button"
+                    onclick="editSunglasses(${index})"
+                >
+                    Edit
+                </button>
+
+                <button
+                    type="button"
+                    onclick="deleteSunglasses(${index})"
+                >
+                    Delete
+                </button>
+
+            </div>
+        `;
+
+
+        container.appendChild(item);
+
+    }
+);
+
+}
+
+/* ---------- EDIT SUNGLASSES ---------- */
+
+function editSunglasses(index) {
+
+const sunglasses =
+    JSON.parse(
+        localStorage.getItem("sunglasses")
+    ) || [];
+
+
+const product =
+    sunglasses[index];
+
+
+if (!product) return;
+
+
+editingSunglassesIndex = index;
+
+
+document.querySelector(
+    ".add-sunglasses-form input[type='text']"
+).value =
+    product.name;
+
+
+document.querySelector(
+    ".add-sunglasses-form select"
+).value =
+    product.category;
+
+
+document.querySelector(
+    ".add-sunglasses-form textarea"
+).value =
+    product.description;
+
+
+const preview =
+    document.getElementById(
+        "sunglassesImagePreview"
+    );
+
+
+preview.src =
+    product.image;
+
+preview.style.display =
+    "block";
+
+
+document.querySelector(
+    ".add-sunglasses-form button[type='button']"
+).textContent =
+    "Update Sunglasses";
+
+
+document.querySelector(
+    ".add-sunglasses-form"
+).scrollIntoView({
+    behavior: "smooth"
+});
+
+}
+
+/* ---------- DELETE SUNGLASSES ---------- */
+
+function deleteSunglasses(index) {
+
+
+let sunglasses =
+    JSON.parse(
+        localStorage.getItem("sunglasses")
+    ) || [];
+
+
+const product =
+    sunglasses[index];
+
+
+if (!product) return;
+
+
+const confirmDelete =
+    confirm(
+        `Are you sure you want to delete "${product.name}"?`
+    );
+
+
+if (!confirmDelete) return;
+
+
+sunglasses.splice(index, 1);
+
+
+localStorage.setItem(
+    "sunglasses",
+    JSON.stringify(sunglasses)
+);
+
+
+alert(
+    "Sunglasses deleted successfully!"
+);
+
+
+loadAdminSunglasses();
+
+
+}
+
+/* ---------- LOAD WHEN ADMIN PAGE OPENS ---------- */
+
+
+
+/* ---------- LOAD SAVED SUNGLASSES ON CUSTOMER PAGE ---------- */
+
+async function loadSunglassesProducts() {
+
+    const grid =
+        document.getElementById(
+            "sunglassesGrid"
+        );
+
+    if (!grid) return;
+
+    grid.innerHTML = "";
+
+    try {
+
+        const {
+            db,
+            collection,
+            getDocs
+        } = await import(
+            "./firebase.js"
+        );
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "sunglasses"
+                )
+            );
+
+
+        if (snapshot.empty) {
+
+            grid.innerHTML = `
+                <p class="no-products">
+                    No sunglasses available yet.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        snapshot.forEach(function(firebaseDoc) {
+
+            const product =
+                firebaseDoc.data();
+
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "frame-card";
+
+
+            card.innerHTML = `
+                <div class="frame-image-wrapper">
+
+                    <img
+                        class="frame-image"
+                        src="${product.image}"
+                        alt="${product.name}"
+                    >
+
+                    <div class="image-overlay">
+                        <span>🔍 View</span>
+                    </div>
+
+                </div>
+
+
+                <div class="frame-card-content">
+
+                    <span class="frame-category-badge">
+                        ${product.category}
+                    </span>
+
+                    <span class="availability-status ${
+                        product.availability === "soldout"
+                        ? "sold-out"
+                        : "available"
+                    }">
+                        ${
+                            product.availability === "soldout"
+                            ? "Sold Out"
+                            : "Available"
+                        }
+                    </span>
+
+                </div>
+
+
+                <h3>${product.name}</h3>
+
+                <p>${product.description}</p>
+
+                <button class="ask-product-button">
+                    Ask About This Product
+                </button>
+            `;
+
+
+            /* ---------- LARGE IMAGE ---------- */
+
+            const image =
+                card.querySelector(
+                    ".frame-image"
+                );
+
+
+            image.addEventListener(
+                "click",
+                function() {
+
+                    openSunglassesImage(
+                        product.image,
+                        product.name
+                    );
+
+                }
+            );
+
+
+            /* ---------- REQUIREMENT ---------- */
+
+            const askButton =
+                card.querySelector(
+                    ".ask-product-button"
+                );
+
+
+            askButton.addEventListener(
+                "click",
+                function() {
+
+                    openProductRequirement(
+                        product.name
+                    );
+
+                }
+            );
+
+
+            grid.appendChild(card);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase sunglasses loading error:",
+            error
+        );
+
+        grid.innerHTML = `
+            <p class="no-products">
+                Unable to load sunglasses.
+            </p>
+        `;
+    }
+}
+
+/* ---------- SUNGLASSES CATEGORY FILTER ---------- */
+
+async function filterSunglasses(category, button) {
+
+    const grid =
+        document.getElementById(
+            "sunglassesGrid"
+        );
+
+    if (!grid) return;
+
+
+    /* ---------- ACTIVE BUTTON ---------- */
+
+    document
+        .querySelectorAll(
+            ".sunglasses-categories button"
+        )
+        .forEach(function(btn) {
+
+            btn.classList.remove(
+                "category-active"
+            );
+
+        });
+
+    button.classList.add(
+        "category-active"
+    );
+
+
+    try {
+
+        const {
+            db,
+            collection,
+            getDocs
+        } = await import(
+            "./firebase.js"
+        );
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "sunglasses"
+                )
+            );
+
+
+        let sunglasses = [];
+
+        snapshot.forEach(function(firebaseDoc) {
+
+            sunglasses.push(
+                firebaseDoc.data()
+            );
+
+        });
+
+
+        /* ---------- FILTER ---------- */
+
+        let filteredSunglasses;
+
+
+        if (category === "all") {
+
+            filteredSunglasses =
+                sunglasses;
+
+        } else {
+
+            filteredSunglasses =
+                sunglasses.filter(
+                    function(product) {
+
+                        return (
+                            product.category &&
+                            product.category
+                                .toLowerCase() ===
+                            category.toLowerCase()
+                        );
+
+                    }
+                );
+        }
+
+
+        /* ---------- CLEAR GRID ---------- */
+
+        grid.innerHTML = "";
+
+
+        /* ---------- NO PRODUCTS ---------- */
+
+        if (
+            filteredSunglasses.length === 0
+        ) {
+
+            grid.innerHTML = `
+                <p class="no-products">
+                    No sunglasses available in this category.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        /* ---------- SHOW PRODUCTS ---------- */
+
+        filteredSunglasses.forEach(
+            function(product) {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+                card.className =
+                    "frame-card";
+
+
+                card.setAttribute(
+                    "data-category",
+                    product.category
+                );
+
+
+                card.innerHTML = `
+                    <div class="frame-image-wrapper">
+
+                        <img
+                            class="frame-image"
+                            src="${product.image}"
+                            alt="${product.name}"
+                        >
+
+                        <div class="image-overlay">
+                            <span>🔍 View</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="frame-card-content">
+
+                        <span class="frame-category-badge">
+                            ${product.category}
+                        </span>
+
+                        <span class="availability-status ${
+                            product.availability === "soldout"
+                            ? "sold-out"
+                            : "available"
+                        }">
+                            ${
+                                product.availability === "soldout"
+                                ? "Sold Out"
+                                : "Available"
+                            }
+                        </span>
+
+                    </div>
+
+
+                    <h3>${product.name}</h3>
+
+                    <p>${product.description}</p>
+
+                    <button class="ask-product-button">
+                        Ask About This Product
+                    </button>
+                `;
+
+
+                /* ---------- LARGE IMAGE ---------- */
+
+                const image =
+                    card.querySelector(
+                        ".frame-image"
+                    );
+
+
+                image.addEventListener(
+                    "click",
+                    function() {
+
+                        openSunglassesImage(
+                            product.image,
+                            product.name
+                        );
+
+                    }
+                );
+
+
+                /* ---------- REQUIREMENT ---------- */
+
+                const askButton =
+                    card.querySelector(
+                        ".ask-product-button"
+                    );
+
+
+                askButton.addEventListener(
+                    "click",
+                    function() {
+
+                        openProductRequirement(
+                            product.name
+                        );
+
+                    }
+                );
+
+
+                grid.appendChild(card);
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Firebase sunglasses filter error:",
+            error
+        );
+
+        grid.innerHTML = `
+            <p class="no-products">
+                Unable to load sunglasses.
+            </p>
+        `;
+    }
+}
+
+
+window.filterSunglasses =
+    filterSunglasses;
+
+
+
+/* ---------- LARGE SUNGLASSES IMAGE ---------- */
+
+function openSunglassesImage(imageSrc, productName) {
+
+    const testImage = new Image();
+
+testImage.onload = function () {
+    console.log(
+        "Sunglasses image actual size:",
+        testImage.naturalWidth,
+        "x",
+        testImage.naturalHeight
+    );
+};
+
+testImage.onerror = function () {
+    console.log("Sunglasses image could not be loaded.");
+};
+
+testImage.src = imageSrc;
+
+    const modal = document.createElement("div");
+
+    modal.className = "product-image-modal";
+
+    modal.innerHTML = `
+
+        <div class="product-modal-content">
+
+            <button
+                class="product-modal-close"
+                type="button"
+            >
+                ×
+            </button>
+
+            <img
+                src="${imageSrc}"
+                alt="${productName || "Sunglasses"}"
+            >
+
+            <p>${productName || "Sunglasses"}</p>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(modal);
+
+
+    /* ---------- CLOSE BUTTON ---------- */
+
+    modal
+        .querySelector(".product-modal-close")
+        .addEventListener("click", function() {
+
+            modal.remove();
+
+        });
+
+
+    /* ---------- CLICK OUTSIDE ---------- */
+
+    modal.addEventListener("click", function(event) {
+
+        if (event.target === modal) {
+
+            modal.remove();
+
+        }
+
+    });
+
+}
+
+/* ---------- OPEN SUNGLASSES REQUIREMENT FORM ---------- */
+
+let selectedProduct = "";
+
+function openProductRequirement(productName) {
+
+    selectedProduct = productName;
+
+    const modal =
+        document.getElementById("requirementModal");
+
+    if (!modal) {
+        alert("Requirement form is not available.");
+        return;
+    }
+
+    modal.style.display = "flex";
+
+    const textarea =
+        document.querySelector(
+            ".requirement-form textarea"
+        );
+
+    if (textarea) {
+
+        textarea.value =
+            "I am interested in " +
+            productName +
+            ".";
+
+    }
+
+}
+
+function closeRequirementForm() {
+
+    const modal =
+        document.getElementById("requirementModal");
+
+    if (modal) {
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+function sendRequirement() {
+
+    const name =
+        document.querySelector(
+            '.requirement-form input[type="text"]'
+        ).value.trim();
+
+    const phone =
+        document.querySelector(
+            '.requirement-form input[type="tel"]'
+        ).value.trim();
+
+    const requirement =
+        document.querySelector(
+            '.requirement-form textarea'
+        ).value.trim();
+
+    if (
+        name === "" ||
+        phone === "" ||
+        requirement === ""
+    ) {
+
+        alert("Please fill in all fields.");
+
+        return;
+
+    }
+
+    const message =
+
+        "Hello Amin Optical Service!\n\n" +
+
+        "New Requirement\n\n" +
+
+        "Name: " +
+        name +
+        "\n" +
+
+        "Phone / WhatsApp: " +
+        phone +
+        "\n" +
+
+        "Product: " +
+        selectedProduct +
+        "\n" +
+
+        "Requirement: " +
+        requirement;
+
+    const whatsappURL =
+
+        "https://wa.me/923300313231?text=" +
+
+        encodeURIComponent(message);
+
+    window.open(
+        whatsappURL,
+        "_blank"
+    );
+
+}
+
+loadAdminSunglasses();
+loadSunglassesProducts();
+
+</script>
+
+<!-- FOOTER -->
+
+<footer>
+
+    <p>
+        © 2026 Amin Optical Service. All Rights Reserved.
+    </p>
+
+</footer>
+
+</body>
+
+</html>

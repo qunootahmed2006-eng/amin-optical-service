@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Frames | Amin Optical Service</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav>
+<a href="index.html" class="logo">
+    <img src="logo.png" alt="Amin Optical Service Logo">
+</a>
+
+    <div class="nav-links">
+        <a href="index.html#home">Home</a>
+        <a href="frames.html">Frames</a>
+        <a href="lenses.html">Lenses</a>
+        <a href="sunglasses.html">Sunglasses</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#contact">Contact</a>
+    </div>
+</nav>
+    </header>
+
+
+    <!-- FRAMES PAGE -->
+
+    <main>
+
+        <section class="frames-page">
+
+            <div class="frames-heading">
+                <p>OUR COLLECTION</p>
+
+                <h1>Eyewear Frames</h1>
+
+                <p>
+                    Explore our collection of stylish and comfortable
+                    frames for every look and everyday wear.
+                </p>
+            </div>
+
+
+            <!-- FRAME PRODUCTS -->
+
+            <!-- FRAME CATEGORIES -->
+
+           <div class="frame-categories">
+
+    <button class="category-active" onclick="filterFrames('all', this)">
+        All Frames
+    </button>
+
+    <button onclick="filterFrames('men', this)">
+        Men's
+    </button>
+
+    <button onclick="filterFrames('women', this)">
+        Women's
+    </button>
+
+    <button onclick="filterFrames('kids', this)">
+        Kids
+    </button>
+
+    <button onclick="filterFrames('unisex', this)">
+        Unisex
+    </button>
+
+    <button onclick="filterFrames('branded', this)">
+        Branded
+    </button>
+
+</div>
+
+            <div class="frames-grid">
+
+    <!-- Admin se added frames yahan JavaScript se load honge -->
+
+</div>
+
+        </section>
+
+    </main>
+
+<!-- REQUIREMENT MODAL -->
+
+<div id="requirementModal" class="requirement-modal">
+
+    <div class="requirement-form">
+
+        <button
+            type="button"
+            class="close-requirement"
+            onclick="closeRequirementForm()"
+        >
+            ×
+        </button>
+
+
+        <h2>Ask About This Product</h2>
+
+        <p>
+            Fill in your details and we'll contact you
+            on WhatsApp.
+        </p>
+
+
+        <label>Your Name</label>
+
+        <input
+            type="text"
+            placeholder="Enter your name"
+        >
+
+
+        <label>Phone / WhatsApp</label>
+
+        <input
+            type="tel"
+            placeholder="Enter your phone number"
+        >
+
+
+        <label>Your Requirement</label>
+
+        <textarea
+            placeholder="Tell us what you need..."
+        ></textarea>
+
+
+        <button
+            type="button"
+            class="submit-requirement"
+            onclick="sendRequirement()"
+        >
+            Send via WhatsApp
+        </button>
+
+    </div>
+
+</div>
+
+<script type="module">
+
+import {
+    db,
+    collection,
+    getDocs
+} from "./firebase.js";
+
+function filterFrames(category, button) {
+
+    const cards = document.querySelectorAll(".frame-card");
+    const buttons = document.querySelectorAll(".frame-categories button");
+
+    buttons.forEach(function(btn) {
+        btn.classList.remove("category-active");
+    });
+
+    button.classList.add("category-active");
+
+    cards.forEach(function(card) {
+
+        const cardCategory =
+            card.getAttribute("data-category") || "";
+
+        if (
+            category === "all" ||
+            cardCategory.split(" ").includes(category)
+        ) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+
+    });
+
+}
+
+/* ---------- LOAD SAVED FRAMES ---------- */
+
+async function loadSavedFrames() {
+
+    const framesGrid =
+        document.querySelector(".frames-grid");
+
+    if (!framesGrid) return;
+
+    framesGrid.innerHTML = "";
+
+    try {
+
+        const snapshot = await getDocs(
+            collection(db, "frames")
+        );
+
+        const fragment = document.createDocumentFragment();
+
+snapshot.forEach(function(doc) {
+
+    const frame = doc.data();
+
+    const card =
+        document.createElement("div");
+
+            card.className = "frame-card";
+
+            card.setAttribute(
+                "data-category",
+                frame.category
+            );
+
+
+            /* ---------- CARD HTML ---------- */
+
+            card.innerHTML = `
+                <div class="frame-image-wrapper">
+                    <img
+    class="frame-image"
+    src="${frame.image}"
+    alt="${frame.name}"
+    loading="lazy"
+    decoding="async"
+>
+
+                    <div class="image-overlay">
+                        <span>🔍 View</span>
+                    </div>
+                </div>
+
+                <div class="frame-card-content">
+
+                    <div class="frame-card-top">
+
+                        <span class="frame-category-badge">
+                            ${frame.category}
+                        </span>
+
+                        <span class="availability-status ${frame.availability === "soldout" ? "sold-out" : "available"}">
+                            ${frame.availability === "soldout" ? "Sold Out" : "Available"}
+                        </span>
+
+                    </div>
+
+                    <h3>${frame.name}</h3>
+
+                    <p>${frame.description}</p>
+
+                    <button class="ask-product-button">
+                        Ask About This Product
+                    </button>
+
+                </div>
+            `;
+
+
+            /* ---------- IMAGE CLICK ---------- */
+
+            const image =
+                card.querySelector(".frame-image");
+
+            image.addEventListener("click", function() {
+
+                openLargeImage(
+                    frame.image,
+                    frame.name
+                );
+
+            });
+
+
+            /* ---------- ASK PRODUCT ---------- */
+
+            const askButton =
+                card.querySelector(".ask-product-button");
+
+            askButton.addEventListener("click", function() {
+
+                openProductRequirement(
+                    frame.name
+                );
+
+            });
+
+fragment.appendChild(card);
+
+});
+
+framesGrid.appendChild(fragment);
+
+    } catch (error) {
+
+        console.error(
+            "Firebase frames loading error:",
+            error
+        );
+
+    }
+
+}
+
+
+
+
+/* ---------- LARGE IMAGE VIEW ---------- */
+
+function openLargeImage(image, name) {
+
+    const modal = document.createElement("div");
+
+    modal.className = "product-image-modal";
+
+    modal.innerHTML = `
+
+        <div class="product-modal-content">
+
+          <button 
+    class="product-modal-close"
+    type="button"
+>
+    ×
+</button>
+
+            <img
+                src="${image}"
+                alt="${name}"
+            >
+
+            <p>${name}</p>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(modal);
+
+    /* ---------- CLOSE BUTTON ---------- */
+
+    modal
+        .querySelector(".product-modal-close")
+        .addEventListener("click", function() {
+
+            modal.remove();
+
+        });
+
+    /* ---------- CLICK OUTSIDE ---------- */
+
+    modal.addEventListener("click", function(event) {
+
+        if (event.target === modal) {
+
+            modal.remove();
+
+        }
+
+    });
+
+    /* ---------- ESC KEY ---------- */
+
+    document.addEventListener(
+        "keydown",
+        function closeWithEscape(event) {
+
+            if (event.key === "Escape") {
+
+                modal.remove();
+
+                document.removeEventListener(
+                    "keydown",
+                    closeWithEscape
+                );
+
+            }
+
+        }
+    );
+
+    document.body.appendChild(modal);
+
+}
+
+/* ---------- REQUIREMENT FORM ---------- */
+
+let selectedProduct = "";
+
+
+function openProductRequirement(productName) {
+
+    selectedProduct = productName;
+
+    const modal =
+        document.getElementById("requirementModal");
+
+    if (!modal) {
+        alert("Requirement form is not available.");
+        return;
+    }
+
+    modal.style.display = "flex";
+
+
+    const textarea =
+        document.querySelector(
+            ".requirement-form textarea"
+        );
+
+    if (textarea) {
+
+        textarea.value =
+            "I am interested in " +
+            productName +
+            ".";
+
+    }
+
+}
+
+
+function closeRequirementForm() {
+
+    const modal =
+        document.getElementById("requirementModal");
+
+    if (modal) {
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+
+/* ---------- SEND TO WHATSAPP ---------- */
+
+function sendRequirement() {
+
+    const name =
+        document.querySelector(
+            '.requirement-form input[type="text"]'
+        ).value.trim();
+
+
+    const phone =
+        document.querySelector(
+            '.requirement-form input[type="tel"]'
+        ).value.trim();
+
+
+    const requirement =
+        document.querySelector(
+            '.requirement-form textarea'
+        ).value.trim();
+
+
+    if (
+        name === "" ||
+        phone === "" ||
+        requirement === ""
+    ) {
+
+        alert("Please fill in all fields.");
+
+        return;
+
+    }
+
+
+    const message =
+
+        "Hello Amin Optical Service!\n\n" +
+
+        "New Requirement\n\n" +
+
+        "Name: " +
+        name +
+        "\n" +
+
+        "Phone / WhatsApp: " +
+        phone +
+        "\n" +
+
+        "Product: " +
+        selectedProduct +
+        "\n" +
+
+        "Requirement: " +
+        requirement;
+
+
+    const whatsappURL =
+
+        "https://wa.me/923300313231?text=" +
+
+        encodeURIComponent(message);
+
+
+    window.open(
+        whatsappURL,
+        "_blank"
+    );
+
+}
+
+window.filterFrames = filterFrames;
+window.openProductRequirement = openProductRequirement;
+window.closeRequirementForm = closeRequirementForm;
+window.sendRequirement = sendRequirement;
+
+
+/* ---------- LOAD PRODUCTS ---------- */
+
+loadSavedFrames();
+
+</script>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+        <p>© 2026 Amin Optical Service. All Rights Reserved.</p>
+    </footer>
+
+
+</body>
+
+</html>

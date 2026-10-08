@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lenses | Amin Optical Service</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <header>
+<nav>
+<a href="index.html" class="logo">
+    <img src="logo.png" alt="Amin Optical Service Logo">
+</a>
+
+    <div class="nav-links">
+        <a href="index.html#home">Home</a>
+        <a href="frames.html">Frames</a>
+        <a href="lenses.html">Lenses</a>
+        <a href="sunglasses.html">Sunglasses</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#contact">Contact</a>
+    </div>
+</nav>
+    </header>
+
+
+    <!-- LENSES PAGE -->
+
+    <main>
+
+        <section class="lenses-page">
+
+            <div class="lenses-heading">
+
+                <p>OUR LENS COLLECTION</p>
+
+                <h1>Find the Right Lenses</h1>
+
+                <p>
+                    Explore lens options designed for clear vision,
+                    comfort and everyday protection.
+                </p>
+
+            </div>
+
+
+            <!-- LENS CATEGORIES -->
+
+<div class="lens-categories">
+
+    <button class="category-active"
+        onclick="filterLenses('all', this)">
+        All Lenses
+    </button>
+
+    <button onclick="filterLenses('optiano', this)">
+        Optiano
+    </button>
+
+    <button onclick="filterLenses('magic-eye', this)">
+        Magic Eye
+    </button>
+
+    <button onclick="filterLenses('dahab', this)">
+        Dahab
+    </button>
+
+    <button onclick="filterLenses('lensme', this)">
+        LensMe
+    </button>
+
+    <button onclick="filterLenses('color-vision', this)">
+        Color Vision
+    </button>
+
+</div>
+
+
+            <!-- LENS PRODUCTS -->
+
+           <div class="lenses-grid" id="lensesGrid">
+
+
+                <!-- LENS CARDS YAHAN AAYENGE -->
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- LENS REQUIREMENT MODAL -->
+
+<!-- REQUIREMENT MODAL -->
+
+<div id="requirementModal" class="requirement-modal">
+
+    <div class="requirement-form">
+
+        <button
+            type="button"
+            class="close-requirement"
+            onclick="closeRequirementForm()"
+        >
+            ×
+        </button>
+
+        <h2>Ask About This Product</h2>
+
+        <p>
+            Fill in your details and we'll contact you
+            on WhatsApp.
+        </p>
+
+        <label>Your Name</label>
+
+        <input
+            type="text"
+            placeholder="Enter your name"
+        >
+
+        <label>Phone / WhatsApp</label>
+
+        <input
+            type="tel"
+            placeholder="Enter your phone number"
+        >
+
+        <label>Your Requirement</label>
+
+        <textarea
+            placeholder="Tell us what you need..."
+        ></textarea>
+
+        <button
+            type="button"
+            class="submit-requirement"
+            onclick="sendRequirement()"
+        >
+            Send via WhatsApp
+        </button>
+
+    </div>
+
+</div>
+
+   <script>
+
+/* ---------- LOAD SAVED LENSES ---------- */
+
+async function loadLenses() {
+
+    const container =
+        document.getElementById("lensesGrid");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    try {
+
+        const {
+            db,
+            collection,
+            getDocs
+        } = await import("./firebase.js");
+
+        const snapshot =
+            await getDocs(
+                collection(db, "lenses")
+            );
+
+        if (snapshot.empty) {
+
+            container.innerHTML = `
+                <p style="grid-column: 1 / -1; text-align: center; color: #777;">
+                    No lenses available yet.
+                </p>
+            `;
+
+            return;
+        }
+
+        snapshot.forEach(function(firebaseDoc) {
+
+            const lens =
+                firebaseDoc.data();
+
+            const card =
+                document.createElement("div");
+
+            card.className = "frame-card";
+
+            card.setAttribute(
+    "data-brand",
+    lens.brand
+);
+
+            card.innerHTML = `
+                <div class="frame-image-wrapper">
+
+                    <img
+    class="frame-image"
+    src="${lens.image}"
+    alt="${lens.name}"
+    loading="lazy"
+    decoding="async"
+>
+
+                    <div class="image-overlay">
+                        <span>🔍 View</span>
+                    </div>
+
+                </div>
+
+                <div class="frame-card-content">
+
+    <span class="frame-category-badge">
+        ${lens.brand
+            .replace("optiano", "Optiano")
+            .replace("magic-eye", "Magic Eye")
+            .replace("dahab", "Dahab")
+            .replace("lensme", "LensMe")
+            .replace("color-vision", "Color Vision")
+        }
+    </span>
+
+                    <span class="availability-status ${
+                        lens.availability === "soldout"
+                        ? "sold-out"
+                        : "available"
+                    }">
+                        ${
+                            lens.availability === "soldout"
+                            ? "Sold Out"
+                            : "Available"
+                        }
+                    </span>
+
+                </div>
+
+                <h3>${lens.name}</h3>
+
+                <p>${lens.description}</p>
+
+                <button class="ask-product-button">
+                    Ask About This Product
+                </button>
+            `;
+
+            container.appendChild(card);
+
+            const askButton =
+                card.querySelector(
+                    ".ask-product-button"
+                );
+
+            askButton.addEventListener(
+                "click",
+                function() {
+
+                    openProductRequirement(
+                        lens.name
+                    );
+
+                }
+            );
+
+            const image =
+                card.querySelector(
+                    ".frame-image"
+                );
+
+            image.addEventListener(
+                "click",
+                function() {
+
+                    openLensImage(
+                        lens.image,
+                        lens.name
+                    );
+
+                }
+            );
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Firebase lenses loading error:",
+            error
+        );
+
+        container.innerHTML = `
+            <p style="grid-column: 1 / -1; text-align: center; color: #777;">
+                Unable to load lenses.
+            </p>
+        `;
+    }
+}
+
+
+/* ---------- LARGE LENS IMAGE ---------- */
+
+function openLensImage(imageSrc, lensName) {
+
+    const modal = document.createElement("div");
+
+    modal.className = "product-image-modal";
+
+    modal.innerHTML = `
+
+        <div class="product-modal-content">
+
+            <button
+                class="product-modal-close"
+                type="button"
+            >
+                ×
+            </button>
+
+            <img
+                src="${imageSrc}"
+                alt="${lensName}"
+            >
+
+            <p>${lensName}</p>
+
+        </div>
+
+    `;
+
+    document.body.appendChild(modal);
+
+
+    /* ---------- CLOSE BUTTON ---------- */
+
+    modal
+        .querySelector(".product-modal-close")
+        .addEventListener("click", function() {
+
+            modal.remove();
+
+        });
+
+
+    /* ---------- CLICK OUTSIDE ---------- */
+
+    modal.addEventListener("click", function(event) {
+
+        if (event.target === modal) {
+
+            modal.remove();
+
+        }
+
+    });
+
+
+    /* ---------- ESC KEY ---------- */
+
+    document.addEventListener(
+        "keydown",
+        function closeWithEscape(event) {
+
+            if (event.key === "Escape") {
+
+                modal.remove();
+
+                document.removeEventListener(
+                    "keydown",
+                    closeWithEscape
+                );
+
+            }
+
+        }
+    );
+
+}
+
+/* ---------- LENS FILTER ---------- */
+
+function filterLenses(brand, button) {
+
+    const cards =
+        document.querySelectorAll(".frame-card");
+
+    const buttons =
+        document.querySelectorAll(
+            ".lens-categories button"
+        );
+
+
+    buttons.forEach(function(btn) {
+
+        btn.classList.remove("category-active");
+
+    });
+
+
+    button.classList.add("category-active");
+
+
+    cards.forEach(function(card) {
+
+        const cardBrand =
+            card.getAttribute("data-brand");
+
+
+        if (
+            brand === "all" ||
+            cardBrand === brand
+        ) {
+
+            card.style.display = "flex";
+
+        } else {
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+}
+/* ---------- REQUIREMENT FORM ---------- */
+
+let selectedProduct = "";
+
+
+function openProductRequirement(productName) {
+
+    selectedProduct = productName;
+
+    const modal =
+        document.getElementById("requirementModal");
+
+    if (!modal) {
+        alert("Requirement form is not available.");
+        return;
+    }
+
+    modal.style.display = "flex";
+
+
+    const textarea =
+        document.querySelector(
+            ".requirement-form textarea"
+        );
+
+    if (textarea) {
+
+        textarea.value =
+            "I am interested in " +
+            productName +
+            ".";
+
+    }
+
+}
+
+
+function closeRequirementForm() {
+
+    const modal =
+        document.getElementById("requirementModal");
+
+    if (modal) {
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+
+/* ---------- SEND TO WHATSAPP ---------- */
+
+function sendRequirement() {
+
+    const name =
+        document.querySelector(
+            '.requirement-form input[type="text"]'
+        ).value.trim();
+
+
+    const phone =
+        document.querySelector(
+            '.requirement-form input[type="tel"]'
+        ).value.trim();
+
+
+    const requirement =
+        document.querySelector(
+            '.requirement-form textarea'
+        ).value.trim();
+
+
+    if (
+        name === "" ||
+        phone === "" ||
+        requirement === ""
+    ) {
+
+        alert("Please fill in all fields.");
+
+        return;
+
+    }
+
+
+    const message =
+
+        "Hello Amin Optical Service!\n\n" +
+
+        "New Requirement\n\n" +
+
+        "Name: " +
+        name +
+        "\n" +
+
+        "Phone / WhatsApp: " +
+        phone +
+        "\n" +
+
+        "Product: " +
+        selectedProduct +
+        "\n" +
+
+        "Requirement: " +
+        requirement;
+
+
+    const whatsappURL =
+
+        "https://wa.me/923300313231?text=" +
+
+        encodeURIComponent(message);
+
+
+    window.open(
+        whatsappURL,
+        "_blank"
+    );
+
+}
+
+
+/* ---------- LOAD LENSES WHEN PAGE OPENS ---------- */
+
+loadLenses();
+
+</script>
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            © 2026 Amin Optical Service. All Rights Reserved.
+        </p>
+
+    </footer>
+
+</body>
+
+</html>
