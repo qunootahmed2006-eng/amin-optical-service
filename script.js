@@ -38,7 +38,7 @@ function sendRequirement() {
         "Requirement: " + requirement;
 
     let whatsappURL =
-        "https://wa.me/923300313231?text=" +
+        "https://wa.me/923477408926?text=" +
         encodeURIComponent(message);
 
     window.open(whatsappURL, "_blank");
